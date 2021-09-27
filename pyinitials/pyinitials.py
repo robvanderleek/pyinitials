@@ -1,26 +1,49 @@
 import re
 from functools import cmp_to_key, reduce
+from typing import Union
 
 
-def initials(s: str) -> str:
+def initials(s: Union[str, list], length=2, existing={}) -> str:
+    if type(s) == list:
+        return _list_initials(s, length, existing)
+    all_options = _possible_initials(s, length)
+    if len(all_options) == 1:
+        return all_options[0]
+    for o in all_options:
+        if len(o) >= length:
+            return o
+    return all_options[-1]
+
+
+def find(s: str) -> str:
+    return initials(s)
+
+
+def _possible_initials(s: str, length=2) -> list[str]:
     if _is_uppercase_only(s):
-        return s
+        return [s]
     preferred = _preferred_initials(s)
     if preferred:
-        return preferred
+        return [preferred]
     if _is_email_address(s):
         s = re.sub(r'@\S+[.]\S+', '', s)
     s = _remove_email_address(s)
+    s = _clear_all_non_characters(s)
     first_letters = [w[0] for w in re.findall(r'\w+', s)]
     result = ''.join(first_letters)
-    if len(result) >= 2:
-        return result
+    if len(result) >= length:
+        return [result]
     else:
-        all_options = _get_all_initials_for_name(s)
-        for o in all_options:
-            if len(o) >= 2:
-                return o
-        return all_options[-1]
+        return _get_all_initials_for_name(s)
+
+
+def _list_initials(l: list, length, existing):
+    result = []
+    for n in l:
+        result.append(initials(n, length, existing))
+    if len(set(result)) != len(set(l)):
+        return _list_initials(l, length + 1, existing)
+    return result
 
 
 def _get_all_initials_for_name(n: str):
@@ -69,6 +92,12 @@ def _is_email_address(s: str) -> bool:
 
 def _remove_email_address(s: str) -> str:
     return re.sub(EMAIL_PATTERN, '', s)
+
+
+def _clear_all_non_characters(s: str) -> str:
+    exp = re.compile(r"[\W\d_]", re.UNICODE)
+    replaced = exp.sub(' ', s)
+    return replaced.strip()
 
 
 def _get_all_initials_for_word(s: str) -> list[str]:
