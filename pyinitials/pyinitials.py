@@ -1,30 +1,40 @@
 import re
-from functools import cmp_to_key, reduce
+from functools import cmp_to_key
 from typing import Union
 
 
-def initials(s: Union[str, list], length=2, existing={}) -> str:
+def initials(s: Union[str, list], length=2, existing=None) -> str:
+    if existing is None:
+        existing = {}
     if type(s) == list:
         return _list_initials(s, length, existing)
-    all_options = _possible_initials(s, length)
-    if len(all_options) == 1:
-        return all_options[0]
-    for o in all_options:
-        if len(o) >= length:
-            return o
-    return all_options[-1]
+    possible_initials = _possible_initials(s, length)
+    by_length = _select_length_from_possible_initials(possible_initials, length)
+    return by_length[0]
 
 
 def find(s: str) -> str:
     return initials(s)
 
 
-def _possible_initials(s: str, length=2) -> list[str]:
+def _select_length_from_possible_initials(possible_initials: dict[int, list[str]], length: int) -> list[str]:
+    sorted_keys = sorted(possible_initials.keys())
+    if len(sorted_keys) == 1:
+        return possible_initials[sorted_keys[0]]
+
+    for k in sorted_keys:
+        if k >= length:
+            return possible_initials[k]
+
+    return possible_initials[sorted_keys[-1]]
+
+
+def _possible_initials(s: str, length=2) -> dict[int, list[str]]:
     if _is_uppercase_only(s):
-        return [s]
+        return {len(s): [s]}
     preferred = _preferred_initials(s)
     if preferred:
-        return [preferred]
+        return {len(preferred): [preferred]}
     if _is_email_address(s):
         s = re.sub(r'@\S+[.]\S+', '', s)
     s = _remove_email_address(s)
@@ -32,15 +42,26 @@ def _possible_initials(s: str, length=2) -> list[str]:
     first_letters = [w[0] for w in re.findall(r'\w+', s)]
     result = ''.join(first_letters)
     if len(result) >= length:
-        return [result]
+        return {len(result): [result]}
     else:
         return _get_all_initials_for_name(s)
 
 
 def _list_initials(l: list, length, existing):
     result = []
+    cache_map = {}
     for n in l:
-        result.append(initials(n, length, existing))
+        if n in cache_map:
+            result.append(cache_map[n])
+            continue
+        possible_initials = _possible_initials(n, length)
+        candidates = _select_length_from_possible_initials(possible_initials, length)
+        for c in candidates:
+            if c in result:
+                continue
+            result.append(c)
+            cache_map[n] = c
+            break
     if len(set(result)) != len(set(l)):
         return _list_initials(l, length + 1, existing)
     return result
@@ -60,14 +81,14 @@ def _get_all_initials_for_name(n: str):
             return diff
 
     all_sorted.sort(key=cmp_to_key(compare_func))
-
-    def reduce_func(a, b):
-        if len(a) == 0 or len(b) > len(a[-1]):
-            return a + [b]
+    result = {}
+    for s in all_sorted:
+        if len(s) in result:
+            (result[len(s)]).append(s)
         else:
-            return a
+            result[len(s)] = [s]
 
-    return reduce(reduce_func, all_sorted, [])
+    return result
 
 
 def _is_uppercase_only(fullname: str):

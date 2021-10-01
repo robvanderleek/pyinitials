@@ -31,6 +31,8 @@ def test_initials_with_array():
     assert initials(['John Doe', 'Jane Dane', 'John Doe']) == ['JDo', 'JDa', 'JDo']
     # assert initials(['John Smith', 'Jane Smith']) == ['JSm', 'JaS']
     # assert initials(['John Doe (JoDo)', 'Jane Dane']), ['JoDo', 'JD'], 'respects preferred initials: John Doe (JoDo), Jane Dane ☛ JoDo, JD')
+
+
 # t.deepEqual(initials(['John Doe (JoDo)', 'Jane Dane (JoDo)']), ['JoDo', 'JoDo'], 'conflicting initials can be enforced: John Doe (JoDo), Jane Dane (JoDo) ☛ JoDo, JoDo')
 # t.deepEqual(initials(['John Doe (JD)', 'Jane Dane']), ['JD', 'JDa'], 'preferred initials are respected in other names: John Doe (JD), Jane Dane ☛ JD, JDa')
 # t.deepEqual(initials(['John Doe <joe@example.com>']), ['JD'], 'emails are ignored in arrays')
@@ -69,9 +71,13 @@ def test_combine_all():
 
 def test_get_all_initials_for_name():
     result = _get_all_initials_for_name('John Doe')
-    expected = ['JD', 'JDo', 'JDoe', 'JoDoe', 'JohDoe', 'JohnDoe']
-    assert result == expected
-    print(_get_all_initials_for_name('Jane Smith'))
+
+    assert result[2][0] == 'JD'
+    assert result[3][0] == 'JDo'
+    assert result[4][0] == 'JDoe'
+    assert result[5][0] == 'JoDoe'
+    assert result[6][0] == 'JohDoe'
+    assert result[7][0] == 'JohnDoe'
 
 
 def test_clear_all_non_characters():
