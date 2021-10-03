@@ -1,4 +1,4 @@
-from pyinitials import initials
+from pyinitials import initials, Candidate
 from pyinitials.pyinitials import _preferred_initials, _is_uppercase_only, _is_email_address, \
     _get_all_initials_for_word, _combine_all, _get_all_initials_for_name, find, _clear_all_non_characters
 
@@ -29,11 +29,10 @@ def test_initials_with_array():
     assert initials(['John Doe', 'Jane Dane']) == ['JDo', 'JDa']
     assert initials(['John Doe (JD)', 'Jane Dane']) == ['JD', 'JDa']
     assert initials(['John Doe', 'Jane Dane', 'John Doe']) == ['JDo', 'JDa', 'JDo']
-    # assert initials(['John Smith', 'Jane Smith']) == ['JSm', 'JaS']
-    # assert initials(['John Doe (JoDo)', 'Jane Dane']), ['JoDo', 'JD'], 'respects preferred initials: John Doe (JoDo), Jane Dane ☛ JoDo, JD')
+    assert initials(['John Smith', 'Jane Smith']) == ['JSm', 'JaS']
+    assert initials(['John Doe (JoDo)', 'Jane Dane']) == ['JoDo', 'JD']
+    assert initials(['John Doe (JoDo)', 'Jane Dane (JoDo)']) == ['JoDo', 'JoDo']
 
-
-# t.deepEqual(initials(['John Doe (JoDo)', 'Jane Dane (JoDo)']), ['JoDo', 'JoDo'], 'conflicting initials can be enforced: John Doe (JoDo), Jane Dane (JoDo) ☛ JoDo, JoDo')
 # t.deepEqual(initials(['John Doe (JD)', 'Jane Dane']), ['JD', 'JDa'], 'preferred initials are respected in other names: John Doe (JD), Jane Dane ☛ JD, JDa')
 # t.deepEqual(initials(['John Doe <joe@example.com>']), ['JD'], 'emails are ignored in arrays')
 # t.deepEqual(initials(['joe@example.com']), ['jo'], 'domains are ignored when a name is an email')
@@ -72,14 +71,26 @@ def test_combine_all():
 def test_get_all_initials_for_name():
     result = _get_all_initials_for_name('John Doe')
 
-    assert result[2][0] == 'JD'
-    assert result[3][0] == 'JDo'
-    assert result[4][0] == 'JDoe'
-    assert result[5][0] == 'JoDoe'
-    assert result[6][0] == 'JohDoe'
-    assert result[7][0] == 'JohnDoe'
+    assert result[2][0].value == 'JD'
+    assert result[3][0].value == 'JDo'
+    assert result[4][0].value == 'JDoe'
+    assert result[5][0].value == 'JoDoe'
+    assert result[6][0].value == 'JohDoe'
+    assert result[7][0].value == 'JohnDoe'
 
 
 def test_clear_all_non_characters():
     assert _clear_all_non_characters('abc') == 'abc'
     assert _clear_all_non_characters('John D.') == 'John D'
+
+
+def test_candidate():
+    c1 = Candidate('aap', False, False)
+    c2 = Candidate('aap', False, False)
+    c3 = Candidate('aap', True, False)
+    c4 = Candidate('noot', False, False)
+
+    assert c1 == c2
+    assert c2 == c3
+    assert c1 == c3
+    assert c1 != c4

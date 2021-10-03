@@ -1,4 +1,5 @@
 import re
+from dataclasses import dataclass
 from functools import cmp_to_key
 from typing import Union
 
@@ -9,32 +10,45 @@ def initials(s: Union[str, list], length=2, existing=None) -> str:
     if type(s) == list:
         return _list_initials(s, length, existing)
     possible_initials = _possible_initials(s, length)
-    by_length = _select_length_from_possible_initials(possible_initials, length)
-    return by_length[0]
+    by_length = _get_candidates_by_length(possible_initials, length)
+    return by_length[0].value
 
 
 def find(s: str) -> str:
     return initials(s)
 
 
-def _select_length_from_possible_initials(possible_initials: dict[int, list[str]], length: int) -> list[str]:
-    sorted_keys = sorted(possible_initials.keys())
+@dataclass
+class Candidate:
+    value: str
+    preferred: bool = False
+    cached: bool = False
+
+    def __eq__(self, othr):
+        return isinstance(othr, type(self)) and self.value == othr.value
+
+    def __hash__(self):
+        return hash((self.value, self.preferred, self.cached))
+
+
+def _get_candidates_by_length(candidates: dict[int, list[Candidate]], length: int) -> list[Candidate]:
+    sorted_keys = sorted(candidates.keys())
     if len(sorted_keys) == 1:
-        return possible_initials[sorted_keys[0]]
+        return candidates[sorted_keys[0]]
 
     for k in sorted_keys:
         if k >= length:
-            return possible_initials[k]
+            return candidates[k]
 
-    return possible_initials[sorted_keys[-1]]
+    return candidates[sorted_keys[-1]]
 
 
-def _possible_initials(s: str, length=2) -> dict[int, list[str]]:
+def _possible_initials(s: str, length=2) -> dict[int, list[Candidate]]:
     if _is_uppercase_only(s):
-        return {len(s): [s]}
+        return {len(s): [Candidate(s)]}
     preferred = _preferred_initials(s)
     if preferred:
-        return {len(preferred): [preferred]}
+        return {len(preferred): [Candidate(preferred, True)]}
     if _is_email_address(s):
         s = re.sub(r'@\S+[.]\S+', '', s)
     s = _remove_email_address(s)
@@ -42,32 +56,41 @@ def _possible_initials(s: str, length=2) -> dict[int, list[str]]:
     first_letters = [w[0] for w in re.findall(r'\w+', s)]
     result = ''.join(first_letters)
     if len(result) >= length:
-        return {len(result): [result]}
+        return {len(result): [Candidate(result)]}
     else:
         return _get_all_initials_for_name(s)
 
 
-def _list_initials(l: list, length, existing):
+def _list_initials(l: list, length, existing) -> list[str]:
     result = []
     cache_map = {}
     for n in l:
         if n in cache_map:
-            result.append(cache_map[n])
+            cached = cache_map[n]
+            result.append(Candidate(cached.value, cached.preferred, True))
             continue
         possible_initials = _possible_initials(n, length)
-        candidates = _select_length_from_possible_initials(possible_initials, length)
+        candidates = _get_candidates_by_length(possible_initials, length)
         for c in candidates:
+            if c.preferred:
+                result.append(c)
+                cache_map[n] = c
+                break
             if c in result:
                 continue
             result.append(c)
             cache_map[n] = c
             break
-    if len(set(result)) != len(set(l)):
-        return _list_initials(l, length + 1, existing)
-    return result
+        else:
+            return _list_initials(l, length + 1, existing)
+    # values = [i.value for i in filter(lambda i: not (i.preferred or i.cached), result)]
+    # values = [i.value for i in filter(lambda i: not i.cached, result)]
+    # if len(values) != len(set(values)):
+    #     return _list_initials(l, length + 1, existing)
+    return [c.value for c in result]
 
 
-def _get_all_initials_for_name(n: str):
+def _get_all_initials_for_name(n: str) -> dict[int, list[Candidate]]:
     parts = re.compile(r'\s+').split(n)
     all_initials = [_get_all_initials_for_word(p) for p in parts]
     all_combined = _combine_all(all_initials)
@@ -84,9 +107,9 @@ def _get_all_initials_for_name(n: str):
     result = {}
     for s in all_sorted:
         if len(s) in result:
-            (result[len(s)]).append(s)
+            (result[len(s)]).append(Candidate(s))
         else:
-            result[len(s)] = [s]
+            result[len(s)] = [Candidate(s)]
 
     return result
 
