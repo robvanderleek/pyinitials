@@ -4,18 +4,79 @@ from functools import cmp_to_key
 from typing import Union
 
 
-def initials(s: Union[str, list], length=2, existing=None) -> str:
+def initials(s: Union[str, list], length=2, existing=None) -> Union[str, list]:
     if existing is None:
         existing = {}
     if type(s) == list:
         return _list_initials(s, length, existing)
-    possible_initials = _possible_initials(s, length)
-    by_length = _get_candidates_by_length(possible_initials, length)
+    if s in existing:
+        return existing[s]
+    candidates = _get_candidates(s, length)
+    by_length = _get_candidates_by_length(candidates, length)
+
     return by_length[0].value
 
 
-def find(s: str) -> str:
-    return initials(s)
+def find(s: str, length=2, existing=None) -> str:
+    return initials(s, length, existing)
+
+
+def add_to(i: Union[str, list], length=2, existing=None) -> str:
+    if type(i) == list:
+        result = []
+        parts_list = parse(i, length, existing)
+        for p in parts_list:
+            result.append(_format(p))
+        return result
+    else:
+        parts = parse(i, length, existing)
+        return _format(parts)
+
+
+@dataclass
+class Parts:
+    name: str
+    initials: Union[str, None] = None
+    email: str = None
+
+
+def parse(i, length=2, existing=None) -> Union[Parts, list[Parts]]:
+    if type(i) == list:
+        return _parse_multiple(i, length, existing)
+    else:
+        return _parse_single(i, length, existing)
+
+
+def _parse_multiple(l: list[str], length: int, existing: dict) -> list[Parts]:
+    initials_list = initials(l, length, existing)
+    result = []
+    for idx, s in enumerate(l):
+        result.append(_parse_single(s, length, {s: initials_list[idx]}))
+    return result
+
+
+def _parse_single(s: str, length: int, existing: dict) -> Parts:
+    initials_part = initials(s, length, existing)
+    email = _get_email_address(s)
+    name_part = _remove_email_address(_remove_preferred_initials(s))
+    if _is_email_address(name_part):
+        name = name_part.strip()
+    else:
+        name = _clear_all_non_characters(name_part).strip()
+    if name == initials_part and not _has_preferred_initials(s):
+        return Parts(name, None, email)
+    else:
+        return Parts(name, initials_part, email)
+
+
+def _format(parts: Parts):
+    if not parts.initials and not parts.email:
+        return parts.name
+    if not parts.email:
+        return parts.name + ' (' + parts.initials + ')'
+    if not parts.name or (parts.name == parts.email):
+        return parts.email + ' (' + parts.initials + ')'
+    return parts.name + ' (' + parts.initials + ') <' + parts.email + '>'
 
 
 @dataclass
@@ -43,15 +104,15 @@ def _get_candidates_by_length(candidates: dict[int, list[Candidate]], length: in
     return candidates[sorted_keys[-1]]
 
 
-def _possible_initials(s: str, length=2) -> dict[int, list[Candidate]]:
+def _get_candidates(s: str, length=2) -> dict[int, list[Candidate]]:
     if _is_uppercase_only(s):
         return {len(s): [Candidate(s)]}
-    preferred = _preferred_initials(s)
+    preferred = _get_preferred_initials(s)
     if preferred:
         return {len(preferred): [Candidate(preferred, True)]}
+    s = _remove_email_address(s)
     if _is_email_address(s):
         s = re.sub(r'@\S+[.]\S+', '', s)
-    s = _remove_email_address(s)
     s = _clear_all_non_characters(s)
     first_letters = [w[0] for w in re.findall(r'\w+', s)]
     result = ''.join(first_letters)
@@ -69,9 +130,12 @@ def _list_initials(l: list, length, existing) -> list[str]:
             cached = cache_map[n]
             result.append(Candidate(cached.value, cached.preferred, True))
             continue
-        possible_initials = _possible_initials(n, length)
-        candidates = _get_candidates_by_length(possible_initials, length)
-        for c in candidates:
+        if n in existing:
+            result.append(Candidate(existing[n]))
+            continue
+        candidates = _get_candidates(n, length)
+        by_length = _get_candidates_by_length(candidates, length)
+        for c in by_length:
             if c.preferred:
                 result.append(c)
                 cache_map[n] = c
@@ -83,10 +147,6 @@ def _list_initials(l: list, length, existing) -> list[str]:
             break
         else:
             return _list_initials(l, length + 1, existing)
-    # values = [i.value for i in filter(lambda i: not (i.preferred or i.cached), result)]
-    # values = [i.value for i in filter(lambda i: not i.cached, result)]
-    # if len(values) != len(set(values)):
-    #     return _list_initials(l, length + 1, existing)
     return [c.value for c in result]
 
 
@@ -119,23 +179,48 @@ def _is_uppercase_only(fullname: str):
     return re.match(uppercase_letters_only_pattern, fullname) is not None
 
 
-def _preferred_initials(fullname: str):
-    initials_in_name_pattern = '[(]([^[)]+)[)]'
-    match = re.search(initials_in_name_pattern, fullname)
+PREFERRED_PATTERN = r'[(]([^[)]+)[)]'
+
+
+def _get_preferred_initials(s: str) -> str:
+    match = re.search(PREFERRED_PATTERN, s)
     if match:
         return match.group(1)
+
+
+def _has_preferred_initials(s: str) -> bool:
+    return _get_preferred_initials(s) is not None
+
+
+def _remove_preferred_initials(s: str) -> str:
+    return re.sub(PREFERRED_PATTERN, '', s)
 
 
 EMAIL_PATTERN = r'\S+@\S+[.]\S+'
 
 
+def _get_email_address(s: str) -> Union[None, str]:
+    match = re.search(EMAIL_PATTERN, s)
+    if match:
+        result = match.group()
+        result = result.lstrip('<')
+        result = result.rstrip('>')
+        return result
+
+
 def _is_email_address(s: str) -> bool:
-    s = s.strip()
-    return re.match(f'^{EMAIL_PATTERN}$', s) is not None
+    return re.match(rf'^\s*{EMAIL_PATTERN}\s*$', s) is not None
 
 
 def _remove_email_address(s: str) -> str:
-    return re.sub(EMAIL_PATTERN, '', s)
+    stripped = re.sub(f'[<]{EMAIL_PATTERN}[>]', '', s)
+    matches = list(re.finditer(EMAIL_PATTERN, s))
+    if len(matches) > 0:
+        m = matches.pop()
+        stripped_again = s[0:m.span()[0]] + s[m.span()[1]:]
+        if len(stripped_again) > 0 and not stripped_again.isspace():
+            return stripped_again
+    return stripped
 
 
 def _clear_all_non_characters(s: str) -> str:
