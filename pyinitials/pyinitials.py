@@ -4,7 +4,9 @@ from functools import cmp_to_key
 from typing import Union
 
 
-def initials(s: Union[str, list], length=2, existing=None) -> Union[str, list]:
+def initials(s: Union[str, list] = None, length=2, existing=None) -> Union[str, list]:
+    if s is None:
+        return ''
     if existing is None:
         existing = {}
     if type(s) == list:
@@ -21,7 +23,9 @@ def find(s: str, length=2, existing=None) -> str:
     return initials(s, length, existing)
 
 
-def add_to(i: Union[str, list], length=2, existing=None) -> str:
+def add_to(i: Union[str, list] = None, length=2, existing=None) -> Union[str, list[str]]:
+    if i is None:
+        return ''
     if type(i) == list:
         result = []
         parts_list = parse(i, length, existing)
@@ -40,8 +44,10 @@ class Parts:
     email: str = None
 
 
-def parse(i, length=2, existing=None) -> Union[Parts, list[Parts]]:
-    if type(i) == list:
+def parse(i=None, length=2, existing=None) -> Union[Parts, list[Parts], None]:
+    if i is None:
+        return None
+    elif type(i) == list:
         return _parse_multiple(i, length, existing)
     else:
         return _parse_single(i, length, existing)
@@ -122,10 +128,13 @@ def _get_candidates(s: str, length=2) -> dict[int, list[Candidate]]:
         return _get_all_initials_for_name(s)
 
 
-def _list_initials(l: list, length, existing) -> list[str]:
+def _list_initials(string_list: list[str], length, existing) -> list[str]:
     result = []
     cache_map = {}
-    for n in l:
+    for n in string_list:
+        if len(n) == 0 or n.isspace():
+            result.append(Candidate(''))
+            continue
         if n in cache_map:
             cached = cache_map[n]
             result.append(Candidate(cached.value, cached.preferred, True))
@@ -146,7 +155,7 @@ def _list_initials(l: list, length, existing) -> list[str]:
             cache_map[n] = c
             break
         else:
-            return _list_initials(l, length + 1, existing)
+            return _list_initials(string_list, length + 1, existing)
     return [c.value for c in result]
 
 

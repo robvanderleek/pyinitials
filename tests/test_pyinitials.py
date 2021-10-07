@@ -70,24 +70,11 @@ def test_add_to_with_array():
     assert add_to(['John Doe', 'Jane Dane']) == ['John Doe (JDo)', 'Jane Dane (JDa)']
 
 
-# test('initials.addTo(nameOrNames, {existing: initialsForNames})', function (t) {
-#     t.equal(
-#         initials.addTo('John Doe', {
-#             existing: {
-#                 'John Doe': 'JoDo'
-#             }
-#         }), 'John Doe (JoDo)', 'respect existing initials')
-#
-# t.deepEqual(
-#     initials.addTo(['John Doe', 'Jane Dane'], {
-#         existing: {
-#             'John Doe': 'JD'
-#         }
-#     }), ['John Doe (JD)', 'Jane Dane (JDa)'], 'respect existing initials')
-#
-# t.end()
-# })
-#
+def test_add_to_with_existing():
+    assert add_to('John Doe', existing={'John Doe': 'JoDo'}) == 'John Doe (JoDo)'
+    assert add_to(['John Doe', 'Jane Dane'], existing={'John Doe': 'JD'}) == ['John Doe (JD)', 'Jane Dane (JDa)']
+
+
 def test_parse():
     assert parse('John Doe') == Parts('John Doe', 'JD')
     assert parse('JD') == Parts('JD')
@@ -95,39 +82,24 @@ def test_parse():
     assert parse('John Doe <joe@example.com>') == Parts('John Doe', 'JD', 'joe@example.com')
 
 
-#
-# test('initials.parse(namesArray)', function (t) {
-#     t.deepEqual(initials.parse(['John Doe', 'Robert Roe', 'Larry Loe']), [{ name: 'John Doe', initials: 'JD' }, { name: 'Robert Roe', initials: 'RR' }, { name: 'Larry Loe', initials: 'LL' }], 'John Doe, Robert Roe, Larry Loe ☛ name: John Doe, initials: JD; name: Robert Roe, initials: RR; name: Larry Loe, initials: LL')
-#
-# t.end()
-# })
-#
-# test('initials.parse(nameOrNames, {existing: initialsForNames})', function (t) {
-#     t.deepEqual(initials.parse('John Doe', {
-#         existing: {
-#             'John Doe': 'JoDo'
-#         }
-#     }), { name: 'John Doe', initials: 'JoDo' }, 'respect existing initials for single name')
-#
-# t.deepEqual(initials.parse(['John Doe', 'Jane Dane'], {
-#     existing: {
-#         'John Doe': 'JD'
-#     }
-# }), [{ name: 'John Doe', initials: 'JD' }, { name: 'Jane Dane', initials: 'JDa' }], 'respect existing initials  for multiple names')
-#
-# t.end()
-# })
-#
-# test('initials(), no params', function (t) {
-#     t.equal(initials(), '', 'initials() without nameOrNames, no initials')
-# t.equal(initials.addTo(), '', 'initials.addTo() without nameOrNames, no initials')
-# t.deepEqual(initials.parse(), {}, 'initials.parse() without nameOrNames, no initials')
-#
-# t.deepEqual(initials(['', '']), ['', ''], 'initials with multiple persons but no names')
-#
-# t.end()
-# })
-#
+def test_parse_with_array():
+    assert parse(['John Doe', 'Robert Roe', 'Larry Loe']) == [Parts('John Doe', 'JD'), Parts('Robert Roe', 'RR'),
+                                                              Parts('Larry Loe', 'LL')]
+
+
+def test_parse_with_existing():
+    assert parse('John Doe', existing={'John Doe': 'JoDo'}) == Parts('John Doe', 'JoDo')
+    assert parse(['John Doe', 'Jane Dane'], existing={'John Doe': 'JD'}) == [Parts('John Doe', 'JD'),
+                                                                             Parts('Jane Dane', 'JDa')]
+
+
+def test_no_params():
+    assert initials() == ''
+    assert add_to() == ''
+    assert parse() is None
+    assert initials(['', '']) == ['', '']
+
+
 def test_name_is_less_than_3():
     assert initials('K') == 'K'
     assert initials('Mo') == 'Mo'
