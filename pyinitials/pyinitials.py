@@ -14,9 +14,7 @@ def initials(s: Union[str, list] = None, length=2, existing=None) -> Union[str, 
     if s in existing:
         return existing[s]
     candidates = _get_candidates(s, length)
-    by_length = _get_candidates_by_length(candidates, length)
-
-    return by_length[0].value
+    return candidates[0].value
 
 
 def find(s: str, length=2, existing=None) -> str:
@@ -110,12 +108,12 @@ def _get_candidates_by_length(candidates: dict[int, list[Candidate]], length: in
     return candidates[sorted_keys[-1]]
 
 
-def _get_candidates(s: str, length=2) -> dict[int, list[Candidate]]:
+def _get_candidates(s: str, length=2) -> list[Candidate]:
     if _is_uppercase_only(s):
-        return {len(s): [Candidate(s)]}
+        return [Candidate(s)]
     preferred = _get_preferred_initials(s)
     if preferred:
-        return {len(preferred): [Candidate(preferred, True)]}
+        return [Candidate(preferred, True)]
     s = _remove_email_address(s)
     if _is_email_address(s):
         s = re.sub(r'@\S+[.]\S+', '', s)
@@ -123,9 +121,10 @@ def _get_candidates(s: str, length=2) -> dict[int, list[Candidate]]:
     first_letters = [w[0] for w in re.findall(r'\w+', s)]
     result = ''.join(first_letters)
     if len(result) >= length:
-        return {len(result): [Candidate(result)]}
+        return [Candidate(result)]
     else:
-        return _get_all_initials_for_name(s)
+        all_initials = _get_all_initials_for_name(s)
+        return _get_candidates_by_length(all_initials, length)
 
 
 def _list_initials(string_list: list[str], length, existing) -> list[str]:
@@ -143,8 +142,7 @@ def _list_initials(string_list: list[str], length, existing) -> list[str]:
             result.append(Candidate(existing[n]))
             continue
         candidates = _get_candidates(n, length)
-        by_length = _get_candidates_by_length(candidates, length)
-        for c in by_length:
+        for c in candidates:
             if c.preferred:
                 result.append(c)
                 cache_map[n] = c

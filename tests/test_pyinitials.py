@@ -18,6 +18,7 @@ def test_initials():
     assert initials('joe@example.com') == 'jo'
     assert initials('John Doe (dj)') == 'dj'
     assert initials('안형준') == '안형'
+    assert initials('Guido van Rossum') == 'GvR'
 
 
 def test_initials_with_length():
