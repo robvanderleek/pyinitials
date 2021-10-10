@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "pyinitials"
-version = "0.9.0"
+version = "0.9.1"
 description = ""
 authors = ["Rob van der Leek <robvanderleek@gmail.com>"]
 readme = "README.md"
+license = "ISC"
 
 [tool.poetry.dependencies]
 python = "^3.9"

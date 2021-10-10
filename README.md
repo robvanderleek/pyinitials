@@ -9,6 +9,8 @@ print(initials('Guido van Rossum')) # prints "GvR"
 [![CI](https://github.com/robvanderleek/pyinitials/actions/workflows/ci.yml/badge.svg)](https://github.com/robvanderleek/pyinitials/actions/workflows/ci.yml)
 [![BCH compliance](https://bettercodehub.com/edge/badge/robvanderleek/pyinitials?branch=main)](https://bettercodehub.com/)
 
+This project is a Python clone of the [JavaScript initials package](https://github.com/gr2m/initials).
+
 # Installation
 
 Install from [PyPi](https://pypi.org/project/pyinitials/), for example with
