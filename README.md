@@ -84,4 +84,4 @@ poetry run pytest
 
 ## LICENSE
 
-[MIT](LICENSE)
+[ISC](LICENSE)
