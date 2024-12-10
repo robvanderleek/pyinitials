@@ -6,8 +6,7 @@ from pyinitials import initials
 print(initials('Guido van Rossum')) # prints "GvR"
 ```
 
-[![CI](https://github.com/robvanderleek/pyinitials/actions/workflows/ci.yml/badge.svg)](https://github.com/robvanderleek/pyinitials/actions/workflows/ci.yml)
-[![BCH compliance](https://bettercodehub.com/edge/badge/robvanderleek/pyinitials?branch=main)](https://bettercodehub.com/)
+[![main](https://github.com/robvanderleek/pyinitials/actions/workflows/main.yml/badge.svg)](https://github.com/robvanderleek/pyinitials/actions/workflows/main.yml)
 
 This project is a Python clone of the [JavaScript initials package](https://github.com/gr2m/initials).
 

@@ -1,20 +1,33 @@
-name: 'CI'
+name: 'main'
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main   
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout'
-      uses: actions/checkout@v2
+    - name: 'Checkout sources'
+      uses: actions/checkout@v4
+
     - name: 'Set up Python'
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+
     - name: 'Set up Poetry'
       uses: snok/install-poetry@v1
+
     - name: 'Install dependencies'
       run: poetry install --no-interaction --no-root
+
     - name: 'Run unit-tests'
       run: poetry run pytest
+
+    - name: 'Run Code Limit'
+      uses: getcodelimit/codelimit-action@v1
