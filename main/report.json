@@ -1,0 +1,73 @@
+{
+  "version": "0.13.0",
+  "uuid": "e1e51f3f-20d4-4f1b-a783-6a76d22770a9",
+  "root": "/github/workspace",
+  "codebase": {
+    "totals": {
+      "Python": {
+        "files": 2,
+        "lines_of_code": 201,
+        "functions": 24,
+        "hard_to_maintain": 0,
+        "unmaintainable": 0
+      }
+    },
+    "tree": {
+      "./": {
+        "entries": [
+          "pyinitials/"
+        ],
+        "profile": [139, 45, 0, 0]
+      },
+      "pyinitials/": {
+        "entries": [
+          "__init__.py",
+          "pyinitials.py"
+        ],
+        "profile": [139, 45, 0, 0]
+      }
+    },
+    "files": {
+      "pyinitials/__init__.py": {
+        "checksum": "65f6c93daafd970ab35f47fda8c0774a",
+        "language": "Python",
+        "loc": 2,
+        "profile": [0, 0, 0, 0],
+        "measurements": [
+        ]
+      },
+      "pyinitials/pyinitials.py": {
+        "checksum": "da95f7f86e19fe9a443073cf65d89c46",
+        "language": "Python",
+        "loc": 199,
+        "profile": [139, 45, 0, 0],
+        "measurements": [
+          {"unit_name": "initials", "start": {"line": 7, "column": 1}, "end": {"line": 17, "column": 31}, "value": 11},
+          {"unit_name": "find", "start": {"line": 20, "column": 1}, "end": {"line": 21, "column": 41}, "value": 2},
+          {"unit_name": "add_to", "start": {"line": 24, "column": 1}, "end": {"line": 35, "column": 30}, "value": 12},
+          {"unit_name": "parse", "start": {"line": 45, "column": 1}, "end": {"line": 51, "column": 50}, "value": 7},
+          {"unit_name": "_parse_multiple", "start": {"line": 54, "column": 1}, "end": {"line": 59, "column": 18}, "value": 6},
+          {"unit_name": "_parse_single", "start": {"line": 62, "column": 1}, "end": {"line": 73, "column": 49}, "value": 12},
+          {"unit_name": "_format", "start": {"line": 76, "column": 1}, "end": {"line": 83, "column": 74}, "value": 8},
+          {"unit_name": "__eq__", "start": {"line": 92, "column": 5}, "end": {"line": 93, "column": 73}, "value": 2},
+          {"unit_name": "__hash__", "start": {"line": 95, "column": 5}, "end": {"line": 96, "column": 63}, "value": 2},
+          {"unit_name": "_get_candidates_by_length", "start": {"line": 99, "column": 1}, "end": {"line": 108, "column": 39}, "value": 8},
+          {"unit_name": "_get_candidates", "start": {"line": 111, "column": 1}, "end": {"line": 127, "column": 63}, "value": 17},
+          {"unit_name": "_list_initials", "start": {"line": 130, "column": 1}, "end": {"line": 157, "column": 37}, "value": 28},
+          {"unit_name": "_get_all_initials_for_name", "start": {"line": 160, "column": 1}, "end": {"line": 181, "column": 18}, "value": 14},
+          {"unit_name": "compare_func", "start": {"line": 166, "column": 5}, "end": {"line": 171, "column": 24}, "value": 6},
+          {"unit_name": "_is_uppercase_only", "start": {"line": 184, "column": 1}, "end": {"line": 186, "column": 74}, "value": 3},
+          {"unit_name": "_get_preferred_initials", "start": {"line": 192, "column": 1}, "end": {"line": 195, "column": 30}, "value": 4},
+          {"unit_name": "_has_preferred_initials", "start": {"line": 198, "column": 1}, "end": {"line": 199, "column": 50}, "value": 2},
+          {"unit_name": "_remove_preferred_initials", "start": {"line": 202, "column": 1}, "end": {"line": 203, "column": 44}, "value": 2},
+          {"unit_name": "_get_email_address", "start": {"line": 209, "column": 1}, "end": {"line": 215, "column": 22}, "value": 7},
+          {"unit_name": "_is_email_address", "start": {"line": 218, "column": 1}, "end": {"line": 219, "column": 64}, "value": 2},
+          {"unit_name": "_remove_email_address", "start": {"line": 222, "column": 1}, "end": {"line": 230, "column": 20}, "value": 9},
+          {"unit_name": "_clear_all_non_characters", "start": {"line": 233, "column": 1}, "end": {"line": 236, "column": 28}, "value": 4},
+          {"unit_name": "_get_all_initials_for_word", "start": {"line": 239, "column": 1}, "end": {"line": 243, "column": 18}, "value": 5},
+          {"unit_name": "_combine_all", "start": {"line": 246, "column": 1}, "end": {"line": 256, "column": 23}, "value": 11}
+        ]
+      }
+    }
+  }
+}
